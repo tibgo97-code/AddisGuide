@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>AddisGuide | LOCAL.TRUSTED.CONNECTED. | Find Any Business in Addis Ababa</title>
+  <!-- Google Fonts & Leaflet CSS -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+      scroll-behavior: smooth;
+    }
+
+    /* Blue & White theme - matching Logo 3 */
+    :root {
+      --primary: #1e3a8a;
+      --primary-dark: #0f2b6d;
+      --primary-light: #3b82f6;
+      --primary-soft: #eef2ff;
+      --accent: #2563eb;
+      --white: #ffffff;
+      --gray-50: #f9fafb;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-600: #475569;
+      --gray-800: #1e293b;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--primary);
+      color: var(--primary);
+      padding: 0.6rem 1.2rem;
+      border-radius: 9999px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-outline:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Header & Navigation with Logo 3 */
+    .navbar {
+      background: var(--white);
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    /* Logo 3 Design: ADDISGuide with location marker icon and tagline */
+    .logo-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+    }
+    .logo-icon {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-md);
+    }
+    .logo-icon svg {
+      width: 28px;
+      height: 28px;
+      filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));
+    }
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+    }
+    .logo-main {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+    .logo-main .addis {
+      color: var(--primary);
+    }
+    .logo-main .guide {
+      color: var(--primary-light);
+      background: linear-gradient(135deg, var(--primary) 30%, var(--primary-light) 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+    .logo-tagline {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: var(--gray-600);
+      text-transform: uppercase;
+    }
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+    .nav-links a {
+      text-decoration: none;
+      font-weight: 500;
+      color: var(--gray-600);
+      transition: color 0.2s;
+    }
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+    .language-switcher {
+      display: flex;
+      gap: 0.5rem;
+      background: var(--gray-100);
+      padding: 0.25rem;
+      border-radius: 40px;
+    }
+    .lang-btn {
+      background: transparent;
+      border: none;
+      padding: 0.4rem 1rem;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+      color: var(--gray-600);
+    }
+    .lang-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+    .premium-badge {
+      background: var(--primary);
+      color: white;
+      padding: 0.4rem 1rem;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .premium-badge:hover {
+      background: var(--primary-dark);
+      transform: scale(0.98);
+    }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e6f0fa 100%);
+      padding: 3rem 0 4rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .hero-content {
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .hero h1 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin-bottom: 1rem;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--gray-600);
+      margin-bottom: 2rem;
+    }
+    .search-box {
+      background: white;
+      border-radius: 60px;
+      padding: 0.5rem 0.5rem 0.5rem 1.5rem;
+      display: flex;
+      gap: 0.5rem;
+      box-shadow: var(--shadow-lg);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .search-box input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+      padding: 0.75rem 0;
+      font-weight: 500;
+    }
+    .promo-banner {
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+      color: white;
+      padding: 0.8rem;
+      text-align: center;
+      font-weight: 500;
+      border-radius: 40px;
+      margin: 1rem 0;
+    }
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 2rem 0 1.5rem;
+      color: var(--gray-800);
+      border-left: 5px solid var(--primary);
+      padding-left: 1rem;
+    }
+    .categories-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.1rem;
+      margin-bottom: 2rem;
+    }
+    .cat-chip {
+      background: white;
+      border: 1px solid var(--gray-200);
+      padding: 0.5rem 1.2rem;
+      border-radius: 40px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .cat-chip.active, .cat-chip:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    .business-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.8rem;
+      margin: 2rem 0;
+    }
+    .business-card {
+      background: white;
+      border-radius: 1.2rem;
+      overflow: hidden;
+      transition: all 0.25s ease;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-200);
+    }
+    .business-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+    .card-header {
+      background: var(--primary);
+      padding: 0.75rem 1.2rem;
+      color: white;
+      font-weight: 500;
+    }
+    .card-body {
+      padding: 1.2rem;
+    }
+    .business-name {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--gray-800);
+    }
+    .business-cat {
+      display: inline-block;
+      background: var(--gray-100);
+      padding: 0.2rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+    }
+    .business-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+      color: var(--gray-600);
+    }
+    .rating {
+      color: #f59e0b;
+      margin: 0.5rem 0;
+      font-weight: 600;
+    }
+    .btn-details {
+      width: 100%;
+      background: var(--gray-100);
+      border: none;
+      padding: 0.6rem;
+      border-radius: 40px;
+      font-weight: 600;
+      color: var(--primary);
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 0.5rem;
+    }
+    .btn-details:hover {
+      background: var(--primary);
+      color: white;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: white;
+      max-width: 500px;
+      width: 90%;
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1.2rem;
+      font-size: 1.8rem;
+      cursor: pointer;
+    }
+    #modal-map {
+      height: 200px;
+      width: 100%;
+      margin: 1rem 0;
+      border-radius: 12px;
+    }
+    .footer {
+      background: var(--gray-800);
+      color: var(--gray-200);
+      padding: 2rem 0;
+      margin-top: 4rem;
+      text-align: center;
+    }
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 1.9rem; }
+      .search-box { flex-direction: column; border-radius: 2rem; padding: 1rem; }
+      .nav-container { flex-wrap: wrap; gap: 0.8rem; }
+      .nav-right { margin-left: auto; }
+      .logo-main { font-size: 1.3rem; }
+      .logo-icon { width: 36px; height: 36px; }
+      .logo-icon svg { width: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="nav-container">
+    <!-- Logo 3: ADDISGuide with location marker icon + tagline LOCAL.TRUSTED.CONNECTED. -->
+    <div class="logo-wrapper" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="white" stroke="white" stroke-width="1.5"/>
+          <circle cx="12" cy="9" r="3" fill="var(--primary)" stroke="white" stroke-width="1.5"/>
+          <path d="M12 2L12 5M12 22L12 19" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <div class="logo-main">
+          <span class="addis">ADDIS</span><span class="guide">Guide</span>
+        </div>
+        <div class="logo-tagline">LOCAL.TRUSTED.CONNECTED.</div>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="nav-links">
+        <a href="#" id="navHome">Home</a>
+        <a href="#" id="navBusinesses">Businesses</a>
+        <a href="#" id="navPromotions">Promotions</a>
+        <div class="premium-badge" id="premiumCta">⭐ Premium Listing</div>
+      </div>
+      <div class="language-switcher">
+        <button class="lang-btn active" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="am">አማ</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="container hero-content">
+      <h1 id="heroTitle">Find any business in Addis Ababa in seconds</h1>
+      <p id="heroSubtitle">Discover restaurants, clinics, shops, hotels & services — with reviews, GPS, and offers.</p>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search by business name, category, or area... e.g., 'Bole restaurant'">
+        <button class="btn-primary" id="searchBtn">🔍 Search</button>
+      </div>
+      <div class="promo-banner" id="promoBanner">
+        ⚡ Limited offer: Get 3 months FREE premium listing for businesses — call us or register today!
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="section-title" id="browseTitle">Browse by Category</div>
+    <div class="categories-grid" id="categoriesContainer"></div>
+    <div class="section-title" id="businessNearTitle">📍 Businesses near you</div>
+    <div id="businessList" class="business-grid"></div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <p id="footerText">📍 AddisGuide — bridging Ethiopian businesses and customers | 📞 +251-911-234567 | ✉️ info@addisguide.com</p>
+    <p style="margin-top: 0.8rem; font-size: 0.8rem;" id="copyrightText">© 2025 AddisGuide Technology PLC. Find, Review & Connect.</p>
+  </div>
+</footer>
+
+<div id="businessModal" class="modal">
+  <div class="modal-content">
+    <span class="modal-close" id="closeModalBtn">&times;</span>
+    <h2 id="modalName" style="color: var(--primary);"></h2>
+    <p id="modalCategory" style="background: var(--gray-100); display: inline-block; padding: 0.2rem 1rem; border-radius: 20px;"></p>
+    <div id="modalMap"></div>
+    <div id="modalInfo" style="margin: 0.8rem 0;"></div>
+    <div id="modalRating" class="rating"></div>
+    <button id="modalPromoBtn" class="btn-primary" style="margin-top: 1rem; width: 100%;">📢 View Promotional Offer</button>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  // BUSINESS DATABASE with bilingual support
+  const businesses = [
+    { id: 1, name: "Yod Abyssinia Restaurant", nameAm: "ዮድ አቢሲኒያ ሬስቶራንት", category: "Restaurants", categoryAm: "ምግብ ቤቶች", address: "Bole, near Atlas", addressAm: "ቦሌ፣ አትላስ አቅራቢያ", phone: "+251-911-123456", lat: 9.0056, lng: 38.7636, rating: 4.7, reviews: 234, promo: "10% off on traditional coffee ceremony", promoAm: "በባህላዊ ቡና ስነ-ስርዓት 10% ቅናሽ", description: "Authentic Ethiopian cuisine & live music", descriptionAm: "ትክክለኛ የኢትዮጵያ ምግብ እና የቀጥታ ሙዚቃ" },
+    { id: 2, name: "St. Gabriel Pharmacy", nameAm: "ቅዱስ ገብርኤል ፋርማሲ", category: "Pharmacies", categoryAm: "ፋርማሲዎች", address: "Piassa, Churchill Avenue", addressAm: "ፒያሳ፣ ቸርችል አቨኑ", phone: "+251-115-551234", lat: 9.0301, lng: 38.7613, rating: 4.5, reviews: 89, promo: "Free delivery on prescription orders", promoAm: "በሐኪም ማዘዣ ትዕዛዝ ነጻ ማድረስ", description: "24/7 pharmacy and health consultations", descriptionAm: "24/7 ፋርማሲ እና የጤና ምክር" },
+    { id: 3, name: "Zefmesh Grand Mall", nameAm: "ዘፍሜሽ ግራንድ ሞል", category: "Shops", categoryAm: "ሱቆች", address: "Meskel Flower, Bole Road", addressAm: "መስቀል አበባ፣ ቦሌ መንገድ", phone: "+251-116-678900", lat: 9.0082, lng: 38.7745, rating: 4.3, reviews: 412, promo: "Summer sale up to 30% off", promoAm: "የበጋ ሽያጭ እስከ 30% ቅናሽ", description: "Clothing, electronics and supermarket", descriptionAm: "አልባሳት፣ ኤሌክትሮኒክስ እና ሱፐርማርኬት" },
+    { id: 4, name: "Hayat Hospital", nameAm: "ሀያት ሆስፒታል", category: "Clinics & Hospitals", categoryAm: "ክሊኒኮች እና ሆስፒታሎች", address: "Bole, around Atlas", addressAm: "ቦሌ፣ አትላስ አካባቢ", phone: "+251-116-618000", lat: 9.0077, lng: 38.7651, rating: 4.6, reviews: 157, promo: "Free health checkup this month", promoAm: "በዚህ ወር ነጻ የጤና ምርመራ", description: "Multi-specialty hospital with 24/7 emergency", descriptionAm: "24/7 የአደጋ ጊዜ አገልግሎት ያለው የተለያዩ ስፔሻሊስቶች ሆስፒታል" },
+    { id: 5, name: "Auto Mech Repair", nameAm: "አውቶ ሜክ ጥገና", category: "Car Repair", categoryAm: "መኪና ጥገና", address: "Merkato, Adwa Bridge", addressAm: "መርካቶ፣ አድዋ ድልድይ", phone: "+251-912-334455", lat: 9.0272, lng: 38.7350, rating: 4.2, reviews: 76, promo: "15% off engine diagnosis", promoAm: "በሞተር ምርመራ 15% ቅናሽ", description: "Mechanical & electrical repairs", descriptionAm: "ሜካኒካል እና ኤሌክትሪካል ጥገና" },
+    { id: 6, name: "Bole International Hotel", nameAm: "ቦሌ ኢንተርናሽናል ሆቴል", category: "Hotels", categoryAm: "ሆቴሎች", address: "Bole, Cameroon Street", addressAm: "ቦሌ፣ ካሜሩን ጎዳና", phone: "+251-116-630000", lat: 9.0096, lng: 38.7778, rating: 4.8, reviews: 320, promo: "Weekend getaway - 20% discount", promoAm: "የሳምንት መጨረሻ እረፍት - 20% ቅናሽ", description: "Luxury rooms & conference halls", descriptionAm: "የቅንጦት ክፍሎች እና የኮንፈረንስ አዳራሾች" },
+    { id: 7, name: "Total Gas Station - Bole", nameAm: "ቶታል ነዳጅ ጣቢያ - ቦሌ", category: "Gas Stations", categoryAm: "ነዳጅ ጣቢያዎች", address: "Bole Road, near Dembel", addressAm: "ቦሌ መንገድ፣ ደምበል አቅራቢያ", phone: "+251-115-551111", lat: 9.0031, lng: 38.7789, rating: 4.4, reviews: 102, promo: "Car wash discount with full tank", promoAm: "ሙሉ ታንክ በመሙላት የመኪና ማጠቢያ ቅናሽ", description: "24/7 fuel & car wash service", descriptionAm: "24/7 ነዳጅ እና የመኪና ማጠቢያ አገልግሎት" },
+    { id: 8, name: "Piassa Parking Center", nameAm: "ፒያሳ ፓርኪንግ ማእከል", category: "Parking Area", categoryAm: "የመኪና ማቆሚያ", address: "Piassa, near Mexico", addressAm: "ፒያሳ፣ ሜክሲኮ አቅራቢያ", phone: "+251-911-998877", lat: 9.0335, lng: 38.7522, rating: 4.1, reviews: 45, promo: "First 2 hours free for registered users", promoAm: "ለተመዘገቡ ተጠቃሚዎች የመጀመሪያ 2 ሰአት ነጻ", description: "Secure underground parking", descriptionAm: "ደህንነቱ የተጠበቀ የመሬት ውስጥ ፓርኪንግ" },
+    { id: 9, name: "Kaleb Electronics", nameAm: "ካሌብ ኤሌክትሮኒክስ", category: "Electronics Shops", categoryAm: "ኤሌክትሮኒክስ ሱቆች", address: "Merkato, Eritrea Street", addressAm: "መርካቶ፣ ኤርትራ ጎዳና", phone: "+251-913-445566", lat: 9.0278, lng: 38.7390, rating: 4.3, reviews: 88, promo: "0% interest installment plan", promoAm: "በ0% ወለድ የክፍያ እቅድ", description: "Mobile phones, laptops & accessories", descriptionAm: "ሞባይል ስልኮች፣ ላፕቶፖች እና መለዋወጫዎች" },
+    { id: 10, name: "Tomoca Coffee", nameAm: "ቶሞካ ቡና", category: "Restaurants", categoryAm: "ምግብ ቤቶች", address: "Bole, Wollo Sefer", addressAm: "ቦሌ፣ ወሎ ሰፈር", phone: "+251-115-123456", lat: 9.0045, lng: 38.7680, rating: 4.9, reviews: 521, promo: "Buy 1 Get 1 Free espresso", promoAm: "አንድ ገዝተህ አንድ ነጻ ኤስፕሬሶ", description: "Iconic Ethiopian coffee house", descriptionAm: "ታዋቂ የኢትዮጵያ ቡና ቤት" },
+    { id: 11, name: "MediCare Clinic", nameAm: "ሜዲኬር ክሊኒክ", category: "Clinics & Hospitals", categoryAm: "ክሊኒኮች እና ሆስፒታሎች", address: "Cazanchise", addressAm: "ካዛንቺስ", phone: "+251-116-611122", lat: 9.0144, lng: 38.7575, rating: 4.4, reviews: 67, promo: "20% off dental cleaning", promoAm: "በጥርስ ህክምና 20% ቅናሽ", description: "General practice & lab services", descriptionAm: "አጠቃላይ ህክምና እና ላብራቶሪ አገልግሎቶች" }
+  ];
+
+  const translations = {
+    en: {
+      navHome: "Home", navBusinesses: "Businesses", navPromotions: "Promotions",
+      heroTitle: "Find any business in Addis Ababa in seconds",
+      heroSubtitle: "Discover restaurants, clinics, shops, hotels & services — with reviews, GPS, and offers.",
+      searchPlaceholder: "Search by business name, category, or area... e.g., 'Bole restaurant'",
+      promoBanner: "⚡ Limited offer: Get 3 months FREE premium listing for businesses — call us or register today!",
+      browseTitle: "Browse by Category",
+      businessNearTitle: "📍 Businesses near you",
+      footerText: "📍 AddisGuide — bridging Ethiopian businesses and customers | 📞 +251-911-234567 | ✉️ info@addisguide.com",
+      copyrightText: "© 2025 AddisGuide Technology PLC. Find, Review & Connect.",
+      modalPromoBtn: "📢 View Promotional Offer",
+      premiumAlert: "🚀 AddisGuide Premium Listing: Get priority placement, photo gallery & analytics. Starting from 300 birr/month. Contact us +251-911-234567 to upgrade!",
+      noResults: "🚫 No businesses found. Try another category or keyword.",
+      viewDetails: "View Details & Map"
+    },
+    am: {
+      navHome: "መነሻ", navBusinesses: "ንግዶች", navPromotions: "ማስተዋወቂያዎች",
+      heroTitle: "በአዲስ አበባ ማንኛውንም ንግድ በሰከንዶች ውስጥ ያግኙ",
+      heroSubtitle: "ምግብ ቤቶች፣ ክሊኒኮች፣ ሱቆች፣ ሆቴሎች እና አገልግሎቶችን ከግምገማዎች፣ ጂፒኤስ እና ቅናሾች ጋር ያግኙ።",
+      searchPlaceholder: "በንግድ ስም፣ ምድብ ወይም አካባቢ ይፈልጉ... ለምሳሌ 'ቦሌ ምግብ ቤት'",
+      promoBanner: "⚡ ውስን ቅናሽ፡ ለንግዶች 3 ወር ነጻ ፕሪሚየም ዝርዝር ያግኙ — ዛሬውኑ ይደውሉ ወይም ይመዝገቡ!",
+      browseTitle: "በምድብ ያስሱ",
+      businessNearTitle: "📍 በአካባቢዎ ያሉ ንግዶች",
+      footerText: "📍 አዲስጋይድ — የኢትዮጵያ ንግዶችን እና ደንበኞችን ማገናኘት | 📞 +251-911-234567 | ✉️ info@addisguide.com",
+      copyrightText: "© 2025 አዲስጋይድ ቴክኖሎጂ ኃላፊነቱ የተወሰነ የግል ማህበር። ያግኙ፣ ይገምግሙ፣ ይገናኙ።",
+      modalPromoBtn: "📢 የማስተዋወቂያ ቅናሽ ይመልከቱ",
+      premiumAlert: "🚀 አዲስጋይድ ፕሪሚየም ዝርዝር፡ ቅድሚያ መቀመጫ፣ የፎቶ ማሳያ እና ዝርዝር መረጃ ያግኙ። ከ300 ብር/ወር ጀምሮ። ለማሻሻል +251-911-234567 ይደውሉ!",
+      noResults: "🚫 ምንም ንግድ አልተገኘም። ሌላ ምድብ ወይም ቁልፍ ቃል ይሞክሩ።",
+      viewDetails: "ዝርዝር እና ካርታ ይመልከቱ"
+    }
+  };
+
+  let currentLang = "en";
+  let currentFilter = "All";
+  let currentSearchTerm = "";
+  let currentMapInstance = null;
+
+  function getLocalizedBiz(biz) {
+    if (currentLang === "am") {
+      return { ...biz, name: biz.nameAm, category: biz.categoryAm, address: biz.addressAm, promo: biz.promoAm, description: biz.descriptionAm };
+    }
+    return biz;
+  }
+
+  function updateUI() {
+    const t = translations[currentLang];
+    document.getElementById("navHome").innerText = t.navHome;
+    document.getElementById("navBusinesses").innerText = t.navBusinesses;
+    document.getElementById("navPromotions").innerText = t.navPromotions;
+    document.getElementById("heroTitle").innerText = t.heroTitle;
+    document.getElementById("heroSubtitle").innerText = t.heroSubtitle;
+    document.getElementById("searchInput").placeholder = t.searchPlaceholder;
+    document.getElementById("promoBanner").innerText = t.promoBanner;
+    document.getElementById("browseTitle").innerText = t.browseTitle;
+    document.getElementById("businessNearTitle").innerText = t.businessNearTitle;
+    document.getElementById("footerText").innerText = t.footerText;
+    document.getElementById("copyrightText").innerText = t.copyrightText;
+    document.getElementById("modalPromoBtn").innerText = t.modalPromoBtn;
+    renderCategories();
+    renderBusinesses();
+  }
+
+  const allCategories = [...new Set(businesses.map(b => b.category))];
+  function renderCategories() {
+    const container = document.getElementById("categoriesContainer");
+    const t = translations[currentLang];
+    let chips = `<div class="cat-chip ${currentFilter === "All" ? "active" : ""}" data-cat="All">${currentLang === "en" ? "All" : "ሁሉም"}</div>`;
+    allCategories.forEach(cat => {
+      const displayCat = currentLang === "am" ? businesses.find(b => b.category === cat)?.categoryAm || cat : cat;
+      chips += `<div class="cat-chip ${currentFilter === cat ? "active" : ""}" data-cat="${cat}">${displayCat}</div>`;
+    });
+    container.innerHTML = chips;
+    document.querySelectorAll(".cat-chip").forEach(chip => {
+      chip.addEventListener("click", () => {
+        currentFilter = chip.getAttribute("data-cat");
+        renderCategories();
+        renderBusinesses();
+      });
+    });
+  }
+
+  function getFiltered() {
+    let filtered = businesses;
+    if (currentFilter !== "All") filtered = filtered.filter(b => b.category === currentFilter);
+    if (currentSearchTerm.trim()) {
+      const term = currentSearchTerm.toLowerCase();
+      filtered = filtered.filter(b => b.name.toLowerCase().includes(term) || b.category.toLowerCase().includes(term) || b.address.toLowerCase().includes(term) || (b.nameAm && b.nameAm.toLowerCase().includes(term)));
+    }
+    return filtered;
+  }
+
+  function renderBusinesses() {
+    const filtered = getFiltered();
+    const container = document.getElementById("businessList");
+    const t = translations[currentLang];
+    if (!filtered.length) { container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:3rem;">${t.noResults}</div>`; return; }
+    container.innerHTML = filtered.map(biz => {
+      const loc = getLocalizedBiz(biz);
+      return `<div class="business-card"><div class="card-header">⭐ ${biz.rating} (${biz.reviews} ${currentLang === "en" ? "reviews" : "ግምገማዎች"})</div><div class="card-body"><div class="business-name">${loc.name}</div><span class="business-cat">${loc.category}</span><div class="business-info"><div>📍 ${loc.address}</div><div>📞 ${biz.phone}</div></div><div class="rating">🔥 ${loc.promo.substring(0, 50)}</div><button class="btn-details view-details" data-id="${biz.id}">${t.viewDetails}</button></div></div>`;
+    }).join('');
+    document.querySelectorAll('.view-details').forEach(btn => btn.addEventListener('click', (e) => { showModal(parseInt(btn.dataset.id)); }));
+  }
+
+  function showModal(id) {
+    const biz = businesses.find(b => b.id === id);
+    if (!biz) return;
+    const loc = getLocalizedBiz(biz);
+    const t = translations[currentLang];
+    document.getElementById("modalName").innerText = loc.name;
+    document.getElementById("modalCategory").innerText = loc.category;
+    document.getElementById("modalInfo").innerHTML = `<div><strong>📍 ${currentLang === "en" ? "Address" : "አድራሻ"}:</strong> ${loc.address}</div><div><strong>📞 ${currentLang === "en" ? "Phone" : "ስልክ"}:</strong> ${biz.phone}</div><div><strong>📝 ${currentLang === "en" ? "About" : "ስለ ንግዱ"}:</strong> ${loc.description}</div><div><strong>🎁 ${currentLang === "en" ? "Special" : "ልዩ ቅናሽ"}:</strong> ${loc.promo}</div>`;
+    document.getElementById("modalRating").innerHTML = `⭐ ${biz.rating} / 5 (${biz.reviews} ${currentLang === "en" ? "customer reviews" : "የደንበኛ ግምገማዎች"})`;
+    const mapDiv = document.getElementById("modalMap");
+    if (currentMapInstance) currentMapInstance.remove();
+    const map = L.map(mapDiv).setView([biz.lat, biz.lng], 15);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
+    L.marker([biz.lat, biz.lng]).addTo(map).bindPopup(`<b>${loc.name}</b><br>${loc.address}`).openPopup();
+    currentMapInstance = map;
+    document.getElementById("modalPromoBtn").onclick = () => alert(`✨ ${loc.name} ${currentLang === "en" ? "offer" : "ቅናሽ"}: ${loc.promo}\n${currentLang === "en" ? "Contact" : "ያግኙን"}: ${biz.phone}`);
+    document.getElementById("businessModal").style.display = "flex";
+  }
+
+  document.querySelectorAll(".lang-btn").forEach(btn => btn.addEventListener("click", () => {
+    document.querySelectorAll(".lang-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentLang = btn.dataset.lang;
+    updateUI();
+  }));
+  document.getElementById("searchBtn").onclick = () => { currentSearchTerm = document.getElementById("searchInput").value; renderBusinesses(); };
+  document.getElementById("searchInput").onkeyup = (e) => { if(e.key === "Enter") { currentSearchTerm = e.target.value; renderBusinesses(); } };
+  document.getElementById("premiumCta").onclick = () => alert(translations[currentLang].premiumAlert);
+  document.getElementById("closeModalBtn").onclick = () => { document.getElementById("businessModal").style.display = "none"; if(currentMapInstance) currentMapInstance.remove(); };
+  window.onclick = (e) => { if(e.target === document.getElementById("businessModal")) { document.getElementById("businessModal").style.display = "none"; if(currentMapInstance) currentMapInstance.remove(); } };
+  updateUI();
+</script>
+</body>
+</html>
